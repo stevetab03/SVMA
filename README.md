@@ -4,7 +4,7 @@
 [![Math: SDE & PDE Theory](https://img.shields.io/badge/Math-SDE_%7C_Generator_Theory-blueviolet)]()
 [![Methods: Global/Local Optimization](https://img.shields.io/badge/Methods-Differential_Evolution_%7C_L--BFGS--B-success)]()
 
-**Author:** Liyuan Zhang
+**Author:** Liyuan Zhang  
 **Status:** R&D Paused / Portfolio Showcase  
 
 ## Executive Summary
