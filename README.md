@@ -91,5 +91,5 @@ My core strength lies in **Systems Architecture**: taking abstract, highly compl
 I am currently seeking **Senior BI Architect / Lead Data Analyst** roles in the Energy or Finance sectors. Thank you for your time. 
 
 **LinkedIn:** https://www.linkedin.com/in/hlzhang/  
-**GitHub:** https://github.com/stevetab03
+**GitHub:** https://github.com/stevetab03  
 **Thesis/Monograph:** Available upon request for full derivations of SECC, SFAET, and SEDT theorems.
