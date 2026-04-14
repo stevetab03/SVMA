@@ -83,12 +83,7 @@ The project is currently on pause following a deep empirical audit.
 
 ---
 
-## Contact: System Architect & BI Lead
-I am an amateur mathematician and systems designer with an **MS in Financial Engineering, MS in Applied Math/Nuclear Engineering, CQF, and PRM.**
-
-My core strength lies in **Systems Architecture**: taking abstract, highly complex business problems (like SDE-modulated market flows) and translating them into robust, logical frameworks. I leverage deep domain knowledge in **Oil & Gas, Financial Markets, and FP&A** to design data architectures that support high-stakes decision-making.
-
-I am currently seeking **Senior BI Architect / Lead Data Analyst** roles in the Energy or Finance sectors. Thank you for your time. 
+## Contact:
 
 **LinkedIn:** https://www.linkedin.com/in/hlzhang/  
 **GitHub:** https://github.com/stevetab03  
