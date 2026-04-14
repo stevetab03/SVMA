@@ -87,4 +87,4 @@ The project is currently on pause following a deep empirical audit.
 
 **LinkedIn:** https://www.linkedin.com/in/hlzhang/  
 **GitHub:** https://github.com/stevetab03  
-**Thesis/Monograph:** Available upon request for full derivations of SECC, SFAET, and SEDT theorems.
+**Monograph:** Available upon request for full derivations of my SVMA Asymptotic Theorems i.e., SVMA Ergodicity and Convergence Conditions, SVMA Fundamental Asymptotic Equilibrium Theorem, SVMA Variance Stabilization Lemma, and SVMA Equilibrium Distribution Theorem.
