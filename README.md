@@ -1,91 +1,188 @@
 # AEM-SVMA: Asymptotic Equilibrium Model for Options Microstructure
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Math: SDE & PDE Theory](https://img.shields.io/badge/Math-SDE_%7C_Generator_Theory-blueviolet)]()
+[![Math: SDE & Generator Theory](https://img.shields.io/badge/Math-SDE_%7C_Generator_Theory-blueviolet)]()
 [![Methods: Global/Local Optimization](https://img.shields.io/badge/Methods-Differential_Evolution_%7C_L--BFGS--B-success)]()
+[![ML: LSTM Benchmark](https://img.shields.io/badge/ML-LSTM_Benchmark-orange)]()
 
-**Author:** Liyuan Zhang  
-**Status:** R&D Paused / Portfolio Showcase  
+**Author:** Liyuan Zhang
+**Status:** R&D Paused / Portfolio Showcase
+
+---
 
 ## Executive Summary
-Traditional financial models like Geometric Brownian Motion (Black-Scholes) and affine variance models (Heston) systematically fail to account for the "gravity" of options market microstructure. Today’s index and leveraged ETFs (SPY, GUSH) are governed by dealer gamma hedging, localized open-interest (OI) clusters, and strike pinning.
 
-The **Asymptotic Equilibrium Model (AEM)** and its core engine, the **Stochastic Volatility Modulated Asymptotic (SVMA)** system, is a framework designed to bridge the gap between structural stochastic calculus and observable market-flow signals. By utilizing a "Drift Decomposition" approach, the model modulates volatility and price-action via statistically gated activations, ensuring the system remains anchored to a theoretically proven **Asymptotic Equilibrium.**
+Traditional financial models — Black-Scholes, Heston, GARCH — are built around
+price dynamics in isolation. They do not account for the structural forces that
+govern modern index and ETF markets: dealer gamma hedging, localized open-interest
+clustering, and strike pinning. These are not noise. They are the dominant
+microstructure of options markets today.
 
----
+The **Asymptotic Equilibrium Model (AEM)** and its core engine, the
+**Stochastic Volatility Modulated Asymptotic (SVMA)** system, bridge structural
+stochastic calculus and observable market-flow signals. The central architectural
+contribution is a modular drift decomposition that gates volatility and price
+dynamics through statistically validated activations, while proving that the system
+converges to a unique stationary distribution under general conditions.
 
-## The Mathematical Engine
-
-### Core SDE System
-The SVMA system operates on a 3D state space tracking the underlying spot price ($F_t$), the dynamic open-interest-anchored strike ($K_t$), and the stochastic volatility factor ($G_t$). Unlike the Heston convention, we model the volatility *level* directly to simplify the diffusion scale:
-
-$$ dF_t = \mu_F(X_t, t) dt + G_t dW^F_t $$
-$$ dK_t = \kappa(k^*_t - K_t) dt + \sigma_K dW^K_t $$
-$$ dG_t = \mu(K_t - G_t) dt + \nu G_t dW^G_t $$
-
-### Drift Decomposition & Activations
-The architectural innovation lies in $\mu_F$, where the drift is not a constant, but a modular sum of baseline forces and **statistically gated activations**:
-
-$$ \mu_F = \underbrace{\alpha_1(K_t - F_t)}_{\text{Baseline Mean Reversion}} + \underbrace{\Phi_{\omega,\delta}(t)\gamma(F_t - \lambda K_t)}_{\text{VECM Cointegration Gate}} + \underbrace{\Psi(F_t, k^*_t) M_{\text{flow}}(t)}_{\text{Local Pinning force}} + \underbrace{\Xi_{\text{mom}}(t)}_{\text{Momentum}} $$
-
-1.  **VECM Activation:** Gated by Augmented Dickey-Fuller (ADF) tests to confirm stationarity in cointegration residuals.
-2.  **Pinning Activation:** A localized kernel centered at high-OI strikes ($k^*$), modulated by the **VegEx Ratio** (Vega Exposure relative to Gamma Exposure).
+Full derivations, theorem statements, and proofs are documented in
+`theory/svma_monograph.pdf`.
 
 ---
 
-## Infinitesimal Generator & PDE Framework
+## What the Model Does
 
-To ensure the model’s reliability for risk management (VaR) and pricing, the framework is grounded in the **Infinitesimal Generator** $\mathcal{A}$ of the SVMA process. For a test function $f \in C^{1,2}$, the generator is defined as:
-
-$$ \mathcal{A}f = \frac{\partial f}{\partial t} + \mu_F \frac{\partial f}{\partial F} + \mu_K \frac{\partial f}{\partial K} + \mu_G \frac{\partial f}{\partial G} + \frac{1}{2} \left[ G^2 \frac{\partial^2 f}{\partial F^2} + \sigma_K^2 \frac{\partial^2 f}{\partial K^2} + \nu^2 G^2 \frac{\partial^2 f}{\partial G^2} \right] $$
-
-This leads to the **Backward Kolmogorov Equation**, which provides the deterministic characterization of conditional expectations required for out-of-sample forecasting:
-
-$$ \frac{\partial u}{\partial s} + \mathcal{A}_s u = 0, \quad u(t, x) = g(x) $$
-
-By satisfying the **SVMA Ergodicity and Convergence Conditions (SECC)**, we prove that the system admits a unique stationary measure $\pi$, preventing numerical "explosions" during high-volatility regimes.
+- Models the joint dynamics of spot price, open-interest-anchored strike, and
+  stochastic volatility as a three-dimensional coupled system
+- Decomposes the price drift into four distinct structural forces: baseline mean
+  reversion, cointegration-gated VECM correction, localized strike pinning, and
+  momentum — each activated only when statistically warranted
+- Proves via infinitesimal generator analysis that the system admits a unique
+  stationary measure, preventing numerical instability during high-volatility regimes
+- Calibrates against observed option surfaces using a vega-weighted objective
+  that prioritises fidelity where risk exposure is largest
 
 ---
 
-## Engineering & Optimization Pipeline
+## Drift Decomposition and Activations
 
-### Global/Local Hybrid Calibration
-Calibration against non-convex option surfaces is handled by a robust two-stage optimizer minimizing a **Vega-Weighted Price RMSE** objective:
-*   **Stage 1 (Global):** **Differential Evolution (DE)** explores the parameter space to avoid local minima.
-*   **Stage 2 (Local):** **L-BFGS-B** refines the DE output to reach gradient-level accuracy within SECC-enforced stability boundaries.
+The architectural innovation is in how the price drift is structured. Rather than
+a constant or affine function, the drift is a modular sum of forces that activate
+conditionally on market state:
 
-### Numerical Integration
-*   **Method:** Milstein Scheme with Operator Splitting.
-*   **Design:** Separates piecewise-constant activation evaluation from continuous stochastic diffusion, ensuring path accuracy $O(\Delta t)$ superior to standard Euler-Maruyama.
+**Baseline Mean Reversion** pulls price toward the open-interest-anchored strike
+as the structural equilibrium.
+
+**VECM Cointegration Gate** activates only when Augmented Dickey-Fuller tests
+confirm stationarity in the cointegration residual between price and strike.
+This ensures the correction term is applied only when the cointegrating
+relationship is statistically valid — not at all times.
+
+**Local Pinning Force** applies a kernel-weighted attraction toward high-OI
+strikes, modulated by the VegEx Ratio — the ratio of dealer vega exposure to
+gamma exposure. When dealers are heavily vega-exposed near a strike, the pinning
+force is amplified.
+
+**Momentum Term** captures short-horizon directional persistence, gated by
+realized flow signals.
+
+The gating design means the model is not always-on. Activations earn their
+inclusion through statistical tests on each window. This is the key distinction
+from standard affine SDE models.
+
+---
+
+## Theoretical Grounding
+
+The framework is grounded in the infinitesimal generator of the SVMA process,
+which characterizes the full dynamics in operator form. Proving that the generator
+satisfies the SVMA Ergodicity and Convergence Conditions (SECC) establishes:
+
+- **Existence and uniqueness** of a stationary distribution
+- **Variance stabilization** — volatility remains bounded under the gating structure
+- **Asymptotic equilibrium** — the system returns to a well-defined distributional
+  steady state after perturbation
+
+These results are not empirical observations. They are theorems derived from the
+structure of the model. The proofs are in `theory/svma_monograph.pdf`.
+
+---
+
+## Engineering Pipeline
+
+### Calibration (`calibrator.py`)
+
+Calibration against non-convex option surfaces uses a two-stage strategy minimising
+a vega-weighted price RMSE objective. Vega-weighting concentrates calibration
+accuracy where dealer exposure — and therefore model risk — is greatest.
+
+- **Stage 1 (Global):** Differential Evolution explores the full parameter space
+  without gradient information, avoiding local minima on the non-convex surface.
+- **Stage 2 (Local):** L-BFGS-B refines the DE output to gradient-level accuracy
+  within the stability boundaries imposed by SECC.
+
+### Simulation (`sde.py`)
+
+Milstein scheme with operator splitting. The splitting separates piecewise-constant
+activation evaluation from continuous stochastic diffusion, preserving path accuracy
+and preventing activation discontinuities from contaminating the diffusion step.
+
+### Validation (`validation.py`)
+
+ADF stationarity tests on cointegration residuals, VegEx ratio computation, and
+out-of-sample vega-weighted RMSE against benchmark models.
 
 ---
 
 ## Model Benchmarking
-The model was rigorously benchmarked against standard parametric and non-parametric architectures using 2023–2025 options data from Polygon.io.
 
-| Model | Avg. Vega-Weighted RMSE | Improvement vs. SVMA |
-| :--- | :--- | :--- |
-| **SVMA (Full Framework)** | **25.56%** | **--** |
-| **LSTM (Deep Learning)** | 32.71% | -21.8% |
-| **Heston Model** | 37.87% | -32.5% |
-| **Black-Scholes (RV)** | 50.38% | -49.3% |
-| **GARCH(1,1)** | 50.83% | -49.7% |
+Benchmarked against standard parametric and non-parametric architectures on
+2023–2025 options data from Polygon.io.
+
+| Model | Avg. Vega-Weighted RMSE | vs. SVMA |
+|---|---|---|
+| **SVMA (Full Framework)** | **25.56%** | — |
+| LSTM (Deep Learning) | 32.71% | −21.8% |
+| Heston Model | 37.87% | −32.5% |
+| Black-Scholes (RV) | 50.38% | −49.3% |
+| GARCH(1,1) | 50.83% | −49.7% |
+
+SVMA outperforms LSTM by 21.8% on vega-weighted RMSE — a structurally grounded
+SDE system outperforming a deep learning baseline on the same data. The
+interpretation: when the structural forces are real and identifiable, encoding
+them explicitly outperforms learning them implicitly from data.
 
 ---
 
 ## Retrospective: Descriptive vs. Predictive Power
 
-The project is currently on pause following a deep empirical audit. 
+The project is currently paused following a rigorous empirical audit.
 
-*   **Descriptive Success:** The AEM-SVMA framework **consistently outperformed LSTM Deep Learning baselines** in fitting the volatility surface. The structural SDE approach proved to be a superior "describer" of market state and dealer rebalancing pressure. It effectively captures "where the market is" better than black-box weights.
-*   **Predictive Reality:** While the model provides an exceptional "map" of microstructure, it is not a "crystal ball." Because the market is dominated by exogenous shocks and unpredictable stochasticity, the model can identify *where price should return* under equilibrium, but it cannot guarantee the *timing* of that return. 
-*   **Final Takeaway:** This project validates that a theoretically-grounded, activation-driven system can outperform ML for high-fidelity modeling, even if generating risk-free arbitrage remains mathematically elusive.
+**Descriptive success.** The AEM-SVMA framework consistently outperformed LSTM
+in fitting the volatility surface. The structural SDE approach proved to be a
+superior characterisation of market microstructure state and dealer rebalancing
+pressure. It captures where the market is with higher fidelity than black-box
+weights.
+
+**Predictive reality.** The model is not a forecasting tool in the conventional
+sense. It identifies where price should return under equilibrium, but cannot
+guarantee the timing of that return. Exogenous shocks — earnings, macro data,
+geopolitical events — are outside the model's scope by design.
+
+**Final takeaway.** A theoretically grounded, activation-driven SDE system can
+outperform deep learning for high-fidelity microstructure modeling. Generating
+risk-free arbitrage remains mathematically elusive, but that was never the claim.
+The claim was that structure beats agnosticism when the structure is real.
+The benchmarks support that claim.
 
 ---
 
-## Contact:
+## Mathematical Documentation
 
-**Monograph:** Available upon request for full derivations of my SVMA Asymptotic Theorems i.e., SVMA Ergodicity and Convergence Conditions, SVMA Fundamental Asymptotic Equilibrium Theorem, SVMA Variance Stabilization Lemma, and SVMA Equilibrium Distribution Theorem.
+Full derivations of the four core theoretical results are available in
+`theory/svma_monograph.pdf`:
 
-**LinkedIn:** https://www.linkedin.com/in/hlzhang/  
-**GitHub:** https://github.com/stevetab03  
+- SVMA Ergodicity and Convergence Conditions (SECC)
+- SVMA Fundamental Asymptotic Equilibrium Theorem
+- SVMA Variance Stabilization Lemma
+- SVMA Equilibrium Distribution Theorem
+
+The monograph is available in compiled PDF form. The LaTeX source is not
+distributed publicly.
+
+---
+
+## Related Work
+
+- [stevetab03/ORBIT](https://github.com/stevetab03/ORBIT) — applies the same
+  structural SDE philosophy to WTI futures-spot basis convergence, with an
+  ML enhancement layer benchmarking Neural SDE, Bayesian Optimization, and
+  LSTM against the classical framework.
+
+---
+
+## Contact
+
+**Monograph:** Available upon request for full derivations of my SVMA Asymptotic Theorems i.e., SVMA Ergodicity and Convergence Conditions, SVMA Fundamental Asymptotic Equilibrium Theorem, SVMA Variance Stabilization Lemma, and SVMA Equilibrium Distribution Theorem.  
+**LinkedIn:** https://www.linkedin.com/in/hlzhang/
+**GitHub:** https://github.com/stevetab03
