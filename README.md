@@ -23,7 +23,7 @@ The **Asymptotic Equilibrium Model (AEM)** and its core engine, the
 stochastic calculus and observable market-flow signals. The central architectural
 contribution is a modular drift decomposition that gates volatility and price
 dynamics through statistically validated activations, while proving that the system
-converges to a unique stationary distribution under general conditions.
+converges to a unique stationary distribution under asymptotic conditions.
 
 Full derivations, theorem statements, and proofs are documented in
 `theory/svma_monograph.pdf`.
@@ -33,14 +33,14 @@ Full derivations, theorem statements, and proofs are documented in
 ## What the Model Does
 
 - Models the joint dynamics of spot price, open-interest-anchored strike, and
-  stochastic volatility as a three-dimensional coupled system
+  stochastic volatility as a multi-dimensional coupled system
 - Decomposes the price drift into four distinct structural forces: baseline mean
-  reversion, cointegration-gated VECM correction, localized strike pinning, and
+  reversion, VECM correction, localized strike pinning, and
   momentum — each activated only when statistically warranted
 - Proves via infinitesimal generator analysis that the system admits a unique
   stationary measure, preventing numerical instability during high-volatility regimes
-- Calibrates against observed option surfaces using a vega-weighted objective
-  that prioritises fidelity where risk exposure is largest
+- Calibrates against observed option surfaces using a vega-weighted objective function
+  that prioritizes fidelity where risk exposure is largest
 
 ---
 
@@ -53,15 +53,10 @@ conditionally on market state:
 **Baseline Mean Reversion** pulls price toward the open-interest-anchored strike
 as the structural equilibrium.
 
-**VECM Cointegration Gate** activates only when Augmented Dickey-Fuller tests
-confirm stationarity in the cointegration residual between price and strike.
-This ensures the correction term is applied only when the cointegrating
-relationship is statistically valid — not at all times.
+**VECM correction** ensures the correction term is applied only when the statistical relationship is valid — not at all times.
 
-**Local Pinning Force** applies a kernel-weighted attraction toward high-OI
-strikes, modulated by the VegEx Ratio — the ratio of dealer vega exposure to
-gamma exposure. When dealers are heavily vega-exposed near a strike, the pinning
-force is amplified.
+**Local Pinning** applies a kernel-weighted attraction toward high-OI
+strikes, modulated by the VegEx Ratio. 
 
 **Momentum Term** captures short-horizon directional persistence, gated by
 realized flow signals.
@@ -75,7 +70,15 @@ from standard affine SDE models.
 ## Theoretical Grounding
 
 The framework is grounded in the infinitesimal generator of the SVMA process,
-which characterizes the full dynamics in operator form. Proving that the generator
+which characterizes the full dynamics in operator form. For a test function $f \in C^{1,2}$, the generator is defined as:
+
+$$ \mathcal{A}f = \frac{\partial f}{\partial t} + \mu_F \frac{\partial f}{\partial F} + \mu_K \frac{\partial f}{\partial K} + \mu_G \frac{\partial f}{\partial G} + \frac{1}{2} \left[ G^2 \frac{\partial^2 f}{\partial F^2} + \sigma_K^2 \frac{\partial^2 f}{\partial K^2} + \nu^2 G^2 \frac{\partial^2 f}{\partial G^2} \right] $$
+
+This leads to the **Backward Kolmogorov Equation**, which provides the deterministic characterization of conditional expectations required for out-of-sample forecasting:
+
+$$ \frac{\partial u}{\partial s} + \mathcal{A}_s u = 0, \quad u(t, x) = g(x) $$
+
+By satisfying the **SVMA Ergodicity and Convergence Conditions (SECC)**, we prove that the generator
 satisfies the SVMA Ergodicity and Convergence Conditions (SECC) establishes:
 
 - **Existence and uniqueness** of a stationary distribution
