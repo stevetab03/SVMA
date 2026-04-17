@@ -50,15 +50,12 @@ The architectural innovation is in how the price drift is structured. Rather tha
 a constant or affine function, the drift is a modular sum of forces that activate
 conditionally on market state:
 
-**Baseline Mean Reversion** pulls price toward the open-interest-anchored strike
+- **Baseline Mean Reversion** pulls price toward the open-interest-anchored strike
 as the structural equilibrium.
-
-**VECM correction** ensures the correction term is applied only when the statistical relationship is valid — not at all times.
-
-**Local Pinning** applies a kernel-weighted attraction toward high-OI
+- **VECM Correction** ensures the correction term is applied only when the statistical relationship is valid — not at all times.
+- **Local Pinning** applies a kernel-weighted attraction toward high-OI
 strikes, modulated by the VegEx Ratio. 
-
-**Momentum Term** captures short-horizon directional persistence, gated by
+- **Momentum** captures short-horizon directional persistence, gated by
 realized flow signals.
 
 The gating design means the model is not always-on. Activations earn their
