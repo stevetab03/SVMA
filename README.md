@@ -163,9 +163,9 @@ Full derivations of the four core theoretical results are available in
 `theory/svma_monograph.pdf`:
 
 - SVMA Ergodicity and Convergence Conditions (SECC)
-- SVMA Fundamental Asymptotic Equilibrium Theorem
-- SVMA Variance Stabilization Lemma
-- SVMA Equilibrium Distribution Theorem
+- SVMA Fundamental Asymptotic Equilibrium Theorem (SFAET)
+- SVMA Variance Stabilization Lemma (SVSL)
+- SVMA Equilibrium Distribution Theorem (SEDT)
 
 The monograph is available in compiled PDF form. The LaTeX source is not
 distributed publicly.
