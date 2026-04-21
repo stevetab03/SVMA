@@ -5,7 +5,7 @@
 [![Methods: Global/Local Optimization](https://img.shields.io/badge/Methods-Differential_Evolution_%7C_L--BFGS--B-success)]()
 [![ML: LSTM Benchmark](https://img.shields.io/badge/ML-LSTM_Benchmark-orange)]()
 
-**Author:** Liyuan Zhang
+**Author:** Liyuan Zhang  
 **Status:** R&D Paused / Portfolio Showcase
 
 ---
