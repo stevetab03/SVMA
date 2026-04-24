@@ -35,7 +35,7 @@ Full derivations, theorem statements, and proofs are documented in
 - Models the joint dynamics of spot price, open-interest-anchored strike, and
   stochastic volatility as a multi-dimensional coupled system
 - Decomposes the price drift into four distinct structural forces: baseline mean
-  reversion, VECM correction, localized strike pinning, and
+  reversion, VECM correction, localized pinning, and
   momentum — each activated only when statistically warranted
 - Proves via infinitesimal generator analysis that the system admits a unique
   stationary measure, preventing numerical instability during high-volatility regimes
